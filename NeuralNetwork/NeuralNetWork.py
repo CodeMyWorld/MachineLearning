@@ -1,7 +1,9 @@
 # encoding: utf-8
 __author__ = 'alex'
 import math
-from Matrix import Matrix
+from Tool import Matrix
+from Tool import DataBuilder
+from Tool import DataInstance
 
 class NeuralNetwork(object):
 
@@ -12,14 +14,19 @@ class NeuralNetwork(object):
     z_value = []
     #number of layers
     nl = 0
-    #error matrix
+    #error matrix 这是残差 名字搞错了
     error_list = []
+    #误差矩阵 每次都要重设为0
+    error_matrix_list=[]
 
 
     def __init__(self, matrix_list):
         self.matrix_list = matrix_list
         self.nl = len(matrix_list)
         self.error_list = [[] for i in range(self.nl+1)]
+        for item in matrix_list:
+            error_matrix_instance = Matrix(item.row, item.column)
+            self.error_matrix_list.append(error_matrix_instance)
 
     @classmethod
     def z_function(cls, input_vector, weights):
@@ -49,13 +56,6 @@ class NeuralNetwork(object):
         current_error_list.append(result)
         self.error_list[self.nl] = current_error_list
         return result
-
-    @classmethod
-    def l_error_term(cls, pre_error_term, weights, input_vector):
-        sum_error = 0
-        # haven't been completed
-        for index in range(len(weights)):
-            sum_error += weights[index] * pre_error_term[index]
 
     def l_error_term(self, iteration):
         sum_error = 0
@@ -90,18 +90,57 @@ class NeuralNetwork(object):
             self.activation_value.append(current_activation)
         return current_activation
 
+    def update_weight(self):
+        #这个循环是整个神经网络层次循环
+        for index in reversed(range(self.nl)):
+            #这个循环是误差 每个列的循环 也就是下标i   Wij
+            for column_index in range(len(self.error_list[index + 1])):
+                #这个循环是激励函数值的循环 也就是下标j
+                for row_index in range(len(self.activation_value[index])):
+                    #差值 还没有更新
+                    self.error_matrix_list[index].matrix[column_index][row_index] \
+                        += self.error_list[index + 1][column_index] * self.activation_value[index][row_index]
+
+    def gradient_descent_iteration(self, filePath, interation_number):
+        data = DataBuilder(filePath)
+        for interation in range(interation_number):
+            for data_instance in data.dataset:
+                self.forward_propagation([data_instance.x, data_instance.y])
+                self.nl_error_term(data_instance.label)
+                self.l_error_term(2)
+                self.l_error_term(1)
+                self.update_weight()
+                #重置 为下一次做准备
+                del self.activation_value[:]
+                del self.error_list[:]
+                self.error_list = [[] for i in range(self.nl+1)]
+                del self.z_value[:]
+            for index in range(len(self.error_matrix_list)):
+                for row_index in range(self.error_matrix_list[index].row):
+                    for column_index in range(self.error_matrix_list[index].column):
+                        self.matrix_list[index].matrix[row_index][column_index] \
+                            = self.error_matrix_list[index].matrix[row_index][column_index]
+                        self.error_matrix_list[index].matrix[row_index][column_index] = 0
+
+
+
+
 matrix_list = []
-matrix_list.append(Matrix([[1,2],[1,3]]))
-matrix_list.append(Matrix([[1,2]]))
+matrix_list.append(Matrix([[0.48443269743504824, 0.5716842223792524], [0.4844340560098434, 0.5716857966763484]]))
+matrix_list.append(Matrix([[1.4935620389134832, 1.493560436008843]]))
 neural_network = NeuralNetwork(matrix_list)
-result = neural_network.forward_propagation([1,1])
-print neural_network.nl_error_term(1)
-print neural_network.z_value
-neural_network.l_error_term(2)
-neural_network.l_error_term(1)
-print neural_network.error_list
 
+data = DataBuilder("trainset.txt")
+for data_instance in data.dataset:
+    neural_network.forward_propagation([data_instance.x, data_instance.y])
+    print "%d %f" %(data_instance.label, neural_network.activation_value[2][0])
+    del neural_network.activation_value[:]
+# neural_network.gradient_descent_iteration("trainset.txt",20)
+# print neural_network.matrix_list[0].matrix
+# print neural_network.matrix_list[1].matrix
 
+# [[0.4865102932949667, 0.5745293509682485], [0.4865132703850679, 0.574532802636167]]
+# [[1.516911995270143, 1.516908445822694]]
 
 
 
