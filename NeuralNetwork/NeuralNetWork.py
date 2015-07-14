@@ -127,8 +127,8 @@ class NeuralNetwork(object):
 
 
 matrix_list = []
-matrix_list.append(Matrix([[-3.1348981767236928, -4.7288592542851005], [-1.9983016330542622, 3.8320060001852716]]))
-matrix_list.append(Matrix([[34.209633358739715, -1.706200089626425]]))
+matrix_list.append(Matrix([[-22.196170816392787, 7.681866702440567], [-7.0060304516162395, 1.2472041822681068]]))
+matrix_list.append(Matrix([[-20.27850764590567, 10.518241338015308]]))
 neural_network = NeuralNetwork(matrix_list)
 
 data = DataBuilder("trainset.txt")
@@ -136,7 +136,7 @@ for data_instance in data.dataset:
     neural_network.forward_propagation([data_instance.x, data_instance.y])
     print "%d %f" %(data_instance.label, neural_network.activation_value[2][0])
     del neural_network.activation_value[:]
-# neural_network.gradient_descent_iteration("trainset.txt",500)
+# neural_network.gradient_descent_iteration("trainset.txt",4000)
 # print neural_network.matrix_list[0].matrix
 # print neural_network.matrix_list[1].matrix
 
