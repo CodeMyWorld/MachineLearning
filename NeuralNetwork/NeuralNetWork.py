@@ -110,6 +110,7 @@ class NeuralNetwork(object):
                 self.l_error_term(2)
                 self.l_error_term(1)
                 self.update_weight()
+                # print self.activation_value
                 #重置 为下一次做准备
                 del self.activation_value[:]
                 del self.error_list[:]
@@ -119,15 +120,15 @@ class NeuralNetwork(object):
                 for row_index in range(self.error_matrix_list[index].row):
                     for column_index in range(self.error_matrix_list[index].column):
                         self.matrix_list[index].matrix[row_index][column_index] \
-                            = self.error_matrix_list[index].matrix[row_index][column_index]
+                            -= self.error_matrix_list[index].matrix[row_index][column_index]
                         self.error_matrix_list[index].matrix[row_index][column_index] = 0
 
 
 
 
 matrix_list = []
-matrix_list.append(Matrix([[0.48443269743504824, 0.5716842223792524], [0.4844340560098434, 0.5716857966763484]]))
-matrix_list.append(Matrix([[1.4935620389134832, 1.493560436008843]]))
+matrix_list.append(Matrix([[-3.1348981767236928, -4.7288592542851005], [-1.9983016330542622, 3.8320060001852716]]))
+matrix_list.append(Matrix([[34.209633358739715, -1.706200089626425]]))
 neural_network = NeuralNetwork(matrix_list)
 
 data = DataBuilder("trainset.txt")
@@ -135,7 +136,7 @@ for data_instance in data.dataset:
     neural_network.forward_propagation([data_instance.x, data_instance.y])
     print "%d %f" %(data_instance.label, neural_network.activation_value[2][0])
     del neural_network.activation_value[:]
-# neural_network.gradient_descent_iteration("trainset.txt",20)
+# neural_network.gradient_descent_iteration("trainset.txt",500)
 # print neural_network.matrix_list[0].matrix
 # print neural_network.matrix_list[1].matrix
 
